@@ -119,8 +119,7 @@ local function date(formatString, unix)
 end
 
 local function clock()
-	local timeYielded, timeServerHasBeenRunning = wait()
-	return timeServerHasBeenRunning
+	return workspace.DistributedGameTime
 end
 
 return setmetatable({date = date, clock = clock}, {__index = os})
