@@ -1,7 +1,7 @@
 # os
 This extends the os table to include os.date and other great functions! It keeps Lua's built-in os functionality, but has a few additions.
 
-## date
+### date
 Functions just like the vanilla Lua function, but padding can be toggled by inserting a '_' like so: os.date("%_x", os.time())
 Note: tick() is the default unix time used for os.date()
 
@@ -54,13 +54,13 @@ local os = require(ThisModule)
 print(os.date("It is currently %r"))
 --> It is currently 03:36:30 pm
 ```
-## clock
+### clock
 Returns how long the server has been active (it's just workspace.DistributedGameTime)
 
-## isLeapYear
+### isLeapYear
 Internal function, but you can use it if you want. The first parameter is the year (should be an integer) and it returns a boolean indicating whether that year is/was/will be a leap year.
 
-## monthLength
+### monthLength
 Finds the length of the desired month.
 ```
 os.monthLength(3, 2017)
