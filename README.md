@@ -66,6 +66,6 @@ Finds the length of the desired month.
 os.monthLength(3, 2017)
 > 31
 -- First parameter is the month [1-12]
--- Second paramter is the year
+-- Second parameter is the year
 -- Returns how many days are in that month
 ```
