@@ -122,7 +122,7 @@ local function clock()
 	return workspace.DistributedGameTime
 end
 
-function isLeapYear(year)
+local function isLeapYear(year)
 	return year % 4 == 0 and (year % 25 ~= 0 or year % 16 == 0)
 end
 
