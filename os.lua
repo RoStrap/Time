@@ -1,3 +1,5 @@
+-- Extends the os table to include the full os.date functionality included in vanilla Lua
+-- @readme https://github.com/RoStrap/Time/blob/master/README.md
 -- @author Validark
 
 -- Necessary string tables
