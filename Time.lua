@@ -2,15 +2,15 @@
 -- @readme https://github.com/RoStrap/Time/blob/master/README.md
 -- @author Validark
 
--- Necessary string tables
+-- Necessary data tables
+local Suffixes = {"st", "nd", "rd"}
 local DayNames = {[0] = "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
 local MonthNames = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"}
+local MonthLengths = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 
 local function IsLeapYear(Year)
 	return Year % 4 == 0 and (Year % 25 ~= 0 or Year % 16 == 0)
 end
-
-local MonthLengths = {31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31}
 
 local function GetMonthLength(Month, Year)
 	return Month == 2 and IsLeapYear(Year) and 29 or MonthLengths[Month]
@@ -123,7 +123,7 @@ local function Date(StringToFormat, UnixSeconds)
 			:gsub("%%n", "\n")
 			:gsub("%%p", Hours >= 12 and "pm" or "am")
 			:gsub("%%_p", Hours >= 12 and "PM" or "AM")
-			:gsub("%%s", (Days < 21 and Days > 3 or Days > 23 and Days < 31) and "th" or ({"st", "nd", "rd"})[Days % 10])
+			:gsub("%%s", (Days < 21 and Days > 3 or Days > 23 and Days < 31) and "th" or Suffixes[Days % 10])
 			:gsub("%%S", ("%02d"):format(Seconds))
 			:gsub("%%_S", Seconds)
 			:gsub("%%t", "\t")
