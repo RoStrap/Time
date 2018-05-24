@@ -1,68 +1,84 @@
-# Time
-Date formatting utilities!
-
-### date
-Functions just like the vanilla Lua `os.date` function, but padding can be toggled by inserting a '_' like so: Time.Date("%_x", os.time())
-Note: tick() is the default unix time used for os.date()
+# Date
+Time and Date formatter mimicking the vanilla os.date function.
 
 ```lua
-Time.Date("*t")
+local Date = Resources:LoadLibrary("Date")
 ```
-returns a table with the following indices:
+Demo:
+```lua
+-- ISO 8601:
+print(Date("%FT%X"))    -- 2018-05-24T00:57:02
+print(Date("%FT%X%#z")) -- 2018-05-24T01:05:34-05:00
 ```
-hour    14
-min     36
-wday    1
-year    2003
-yday    124
-month   5
-sec     33
-day     4
+
+Functions just like the vanilla Lua `os.date` function, but padding can be toggled by inserting a '#' like so: `Date("%#x", os.time())`
+
+```lua
+table.foreach(Date("*t"), print)
 ```
+
+Returns a table with the following indices:
+
+```
+hour 6
+min 16
+wday 5
+day 24
+month 5
+year 2018
+sec 29
+yday 144
+isdst false
+```
+
 String reference:
-```
-%a	abbreviated weekday name (e.g., Wed)
-%A	full weekday name (e.g., Wednesday)
-%b	abbreviated month name (e.g., Sep)
-%B	full month name (e.g., September)
-%c	date and time (e.g., 09/16/98 23:48:10)
-%d	day of the month (16) [01-31]
-%H	hour, using a 24-hour clock (23) [00-23]
-%I	hour, using a 12-hour clock (11) [01-12]
-%j	day of year [0-365] (March 1st is treated as day 0 of year)
-%M	minute (48) [00-59]
-%m	month (09) [01-12]
-%n	New-line character ('\n')
-%p	either "am" or "pm" ('_' makes it uppercase)
-%r	12-hour clock time *	02:55:02 pm
-%R	24-hour HH:MM time, equivalent to %H:%M	14:55
-%s	day suffix
-%S	second (10) [00-61]
-%t	Horizontal-tab character ('\t')
-%T	Basically %r but without seconds (HH:MM AM), equivalent to %I:%M %p	2:55 pm
-%u	ISO 8601 weekday as number with Monday as 1 (1-7)	4
-%w	weekday (3) [0-6 = Sunday-Saturday]
-%x	date (e.g., 09/16/98)
-%X	time (e.g., 23:48:10)
-%Y	full year (1998)
-%y	two-digit year (98) [00-99]
-%%	the character `%´
-```
-Example:
-```lua
-local Time = require(ThisModule)
-print(Time.Date("It is currently %r"))
---> It is currently 03:36:30 pm
-```
-### IsLeapYear
-Internal function, but you can use it if you want. The first parameter is the year (should be an integer) and it returns a boolean indicating whether that year is/was/will be a leap year.
 
-### MonthLength
-Finds the length of the desired month.
 ```
-Time.MonthLength(3, 2017)
-> 31
--- First parameter is the month [1-12]
--- Second parameter is the year
--- Returns how many days are in that month
+%c = "%a %b %e %X %Y";
+%D = "%m/%d/%y";
+%F = "%Y-%m-%d";
+%n = "\n";
+%R = "%H:%M";
+%r = "%I:%M:%S %p";
+%T = "%I:%M %p";
+%t = "\t";
+%v = "%e-%b-%Y";
+%X = "%H:%M:%S";
+%x = "%m/%d/%y";
+
+%% = the character `%´
+%a = abbreviated weekday name (e.g., Wed)
+%A = full weekday name (e.g., Wednesday)
+%b = abbreviated month name (e.g., Sep)
+%B = full month name (e.g., September)
+%C = century: (year / 100) single digits are preceded by a zero
+%d = day of the month (16) [01-31]
+%e = day of month as decimal number [ 1, 31]
+%g = Same year as in %G, but as a decimal number without century [00, 99]
+%G = a 4-digit year as a decimal number with century
+%H = hour, using a 24-hour clock (23) [00-23]
+%I = hour, using a 12-hour clock (11) [01-12]
+%j = day of year [001-366] (March 1st is treated as day 0 of year)
+%k = Hour in 24-hour format [ 0, 23]
+%l = Hour in 12-hour format [ 1, 12]
+%m = month (09) [01, 12]
+%M = minute (48) [00, 59]
+%p = either "am" or "pm" ('#' makes it uppercase)
+%s = Day of year suffix: e.g. 12th, 31st, 22nd
+%S = Second as decimal number [00, 59]
+%u = ISO 8601 weekday as number with Monday as 1 [1, 7]
+%U = Week of year, Sunday Based [00, 53]
+%V = week number of year (Monday as beginning of week) [01, 53]
+%w = weekday (3) [0-6 = Sunday-Saturday]
+%W = Week of year with Monday as first day of week [0, 53]
+%y = two-digit year (98) [00, 99]
+%Y = full year (1998)
+%z = Time zone offset from UTC in the form [+-]%02Hours%02Minutes, e.g. +0500
+```
+
+Example:
+
+```lua
+print(Date("It is currently %#r"))
+--> It is currently 1:41:20 am
 ```
