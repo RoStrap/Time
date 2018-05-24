@@ -1,57 +1,53 @@
 # Date
-Time and Date formatter mimicking the vanilla os.date function.
+Time and Date formatter mimicking the vanilla `os.date` function.
 
 ```lua
 local Date = Resources:LoadLibrary("Date")
 ```
+
 Demo:
+
 ```lua
 -- ISO 8601:
-print(Date("%FT%X"))    -- 2018-05-24T00:57:02
-print(Date("%FT%X%#z")) -- 2018-05-24T01:05:34-05:00
+print(Date("%FT%T"))    -- 2018-05-24T00:57:02
+print(Date("%FT%T%#z")) -- 2018-05-24T01:05:34-05:00
 ```
 
-Functions just like the vanilla Lua `os.date` function, but padding can be toggled by inserting a '#' like so: `Date("%#x", os.time())`
+Functions just like the vanilla Lua `os.date` function, but padding can be toggled by inserting a '#' like so:
 
 ```lua
-table.foreach(Date("*t"), print)
-```
-
-Returns a table with the following indices:
-
-```
-hour 6
-min 16
-wday 5
-day 24
-month 5
-year 2018
-sec 29
-yday 144
-isdst false
+print(Date("%#x", os.time()))
 ```
 
 String reference:
 
 ```
-%c = "%a %b %e %X %Y";
-%D = "%m/%d/%y";
-%F = "%Y-%m-%d";
-%n = "\n";
-%R = "%H:%M";
-%r = "%I:%M:%S %p";
-%T = "%I:%M %p";
-%t = "\t";
-%v = "%e-%b-%Y";
-%X = "%H:%M:%S";
-%x = "%m/%d/%y";
+The following patterns will be replaced by their tags below:
+%c = "%a %b %e %X %Y"
+%D = "%m/%d/%y"
+%F = "%Y-%m-%d"
+%n = "\n"
+%R = "%H:%M"
+%r = "%I:%M:%S %p"
+%T = "%H:%M:%S"
+%t = "\t"
+%v = "%e-%b-%Y"
+%X = "%T"
+%x = "%D"
 
+%#c = "%#x, %#X"
+%#r = "%#I:%M:%S %#p"
+%#T = "%#H:%M:%S"
+%#X = "%#T"
+%#x = "%A, %B %#d, %#Y"
+
+The following tags will be replaced as follows:
 %% = the character `%´
 %a = abbreviated weekday name (e.g., Wed)
 %A = full weekday name (e.g., Wednesday)
 %b = abbreviated month name (e.g., Sep)
 %B = full month name (e.g., September)
-%C = century: (year / 100) single digits are preceded by a zero
+%C = century: (year / 100) (padded)
 %d = day of the month (16) [01-31]
 %e = day of month as decimal number [ 1, 31]
 %g = Same year as in %G, but as a decimal number without century [00, 99]
