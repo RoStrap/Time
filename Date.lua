@@ -2,7 +2,8 @@
 -- @readme https://github.com/RoStrap/Time/blob/master/README.md
 -- @author Validark
 
-local V_Helper = require(script:FindFirstChild("V_Helper"))
+local Resources = require(game:GetService("ReplicatedStorage"):WaitForChild("Resources"))
+local Debug = Resources:LoadLibrary("Debug")
 
 local Suffixes = {"st", "nd", "rd"}
 local DayNames = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
@@ -17,24 +18,29 @@ local Patterns = {
 	n = "\n";
 	R = "%H:%M";
 	r = "%I:%M:%S %p";
-	T = "%I:%M %p";
+	T = "%H:%M:%S";
 	t = "\t";
 	v = "%e-%b-%Y";
-	X = "%H:%M:%S";
-	x = "%m/%d/%y";
+	X = "%T";
+	x = "%D";
 
 	["#c"] = "%#x, %#X";
 	["#r"] = "%#I:%M:%S %#p";
-	["#T"] = "%#I:%M %#p";
-	["#X"] = "%#H:%M:%S";
+	["#T"] = "%#H:%M:%S";
+	["#X"] = "%#T";
 	["#x"] = "%A, %B %#d, %#Y";
+
+	["%"] = "%";
 }
 
-for Tag, Pattern in next, Patterns do
-	Patterns[Tag] = Pattern:gsub("%%(#?%a)", Patterns)
-end
-
+local floor = math.floor
 local os_date = os.date
+
+local function CountDays(Year)
+	-- Returns the number of days in a given number of Years
+	return 365*Year +
+		(Year - Year % 4) / 4 - (Year - Year % 100) / 100 + (Year - Year % 400) / 400 -- the number of Leap days
+end
 
 local TimeZoneOffset, TimeZoneOffset2 do
 	local TimeData = os_date("!*t")
@@ -46,36 +52,10 @@ local TimeZoneOffset, TimeZoneOffset2 do
 	TimeZoneOffset = TimeZoneOffset2:gsub(":", "", 1)
 end
 
-local function YearWhichMostDaysOfThisWeekAreWithin(TimeData)
-	-- Returns whether most days of this week are outside this year
-	-- @returns TimeData.year + 0 if most days of this week are in this year
-	-- @returns TimeData.year + 1 if most days of this week are in next year
-	-- @returns TimeData.year - 1 if most days of this week are in last year
-	-- Note: Treats Monday as the beginning of the week
-
-	local yday = TimeData.yday
-
-	if yday < 4 then
-		local wday = TimeData.wday == 1 and 6 or TimeData.wday - 2 -- [0, 6] Monday as Beginning
-		local MondayOfWeek = TimeData.day - wday -- Get the TimeData.day of the first day of this week
-		return MondayOfWeek < -2 and TimeData.year - 1 or TimeData.year
-	elseif yday > 362 then
-		local wday = TimeData.wday == 1 and 6 or TimeData.wday - 2 -- [0, 6] Monday as Beginning
-		local MondayOfWeek = TimeData.day - wday -- Get the TimeData.day of the first day of this week
-		return MondayOfWeek > 28 and TimeData.year + 1 or TimeData.year
-	end
-
-	return TimeData.year
-end
-
-local Tags
-
-Tags = setmetatable({
-	-- Sources
+local Tags = setmetatable({
+	-- Sources:
 	-- https://developer.apple.com/legacy/library/documentation/Darwin/Reference/ManPages/man3/strftime.3.html
 	-- https://msdn.microsoft.com/en-us/library/fe06s4ak.aspx
-
-	["%"] = function() return "%" end;
 
 	A = function(TimeData) -- Full weekday name
 		return DayNames[TimeData.wday]
@@ -113,17 +93,38 @@ Tags = setmetatable({
 		return ("%2d"):format(TimeData.day)
 	end;
 
-	G = function(TimeData)
-		-- %G is replaced by a year as a decimal number with century.
-		-- This year is the one that contains the greater part of the week (Monday as the first day of the week)
-
-		return ("%04d"):format(YearWhichMostDaysOfThisWeekAreWithin(TimeData))
+	G = function(TimeData) -- year that contains the greater part of the week (Monday as the first day of the week)
+		return ("%04d"):format(TimeData["#G"])
 	end;
 
-	g = function(TimeData)
-		-- %g is replaced by the same year as in %G, but as a decimal number without century (00-99).
+	["#G"] = function(TimeData)
+		-- Returns whether most days of this week are outside this year
+		-- @returns TimeData.year + 0 if most days of this week are in this year
+		-- @returns TimeData.year + 1 if most days of this week are in next year
+		-- @returns TimeData.year - 1 if most days of this week are in last year
+		-- Note: Treats Monday as the beginning of the week
 
-		return ("%02d"):format(YearWhichMostDaysOfThisWeekAreWithin(TimeData) % 100)
+		local yday = TimeData.yday
+
+		if yday < 4 then
+			local wday = TimeData.wday == 1 and 6 or TimeData.wday - 2 -- [0, 6] Monday as Beginning
+			local MondayOfWeek = TimeData.day - wday -- Get the TimeData.day of the first day of this week
+			return MondayOfWeek < -2 and TimeData.year - 1 or TimeData.year
+		elseif yday > 362 then
+			local wday = TimeData.wday == 1 and 6 or TimeData.wday - 2 -- [0, 6] Monday as Beginning
+			local MondayOfWeek = TimeData.day - wday -- Get the TimeData.day of the first day of this week
+			return MondayOfWeek > 28 and TimeData.year + 1 or TimeData.year
+		end
+
+		return TimeData.year
+	end;
+
+	g = function(TimeData) -- same year as in %G, but without century [00, 99].
+		return ("%02d"):format(TimeData["#G"] % 100)
+	end;
+
+	["#g"] = function(TimeData) -- same year as in %#G, but without century [0, 99].
+		return TimeData["#G"] % 100
 	end;
 
 	H = function(TimeData) -- Hour in 24-hour format [00, 23]
@@ -199,8 +200,7 @@ Tags = setmetatable({
 	end;
 
 	U = function(TimeData) -- Week of year, Sunday Based [00, 53]
-		local x = (TimeData.yday - TimeData.wday)
-		return ("%02d"):format(1 + (x - x % 7) / 7)
+		return ("%02d"):format(1 + (TimeData.yday - TimeData.wday) / 7)
 	end;
 
 	["#U"] = function(TimeData) -- Week of year, Sunday Based [0, 53]
@@ -213,16 +213,44 @@ Tags = setmetatable({
 	end;
 
 	V = function(TimeData)
-		-- Validark tried to write logic for this but couldn't get the math to work. Pls help
+		return ("%02d"):format(TimeData["#V"])
+	end;
+
+	["#V"] = function(TimeData)
+		-- If anyone thinks of a better solution, submit a pull request: https://github.com/RoStrap/Time/
+		-- @original https://github.com/Tieske/date
 		-- replaced by the week number of the year (Monday as the first day of the week) as a decimal
-		-- number (01-53).  If the week containing January 1 has four or more days in the new year, then it
+		-- number [01, 53].  If the week containing January 1 has four or more days in the new year, then it
 		-- is week 1; otherwise it is the last week of the previous year, and the next week is week 1
 
-		return ("%02d"):format(V_Helper.isowy(V_Helper.CountDays(TimeData.year - 1) + TimeData.yday))
+		local dn = CountDays(TimeData.year - 1) + TimeData.yday
+
+		local y, yd do
+			local g = dn + 306
+			y = floor((10000*g + 14780) / 3652425)
+			yd = CountDays(y)
+			local d = g - yd
+			if d < 0 then y = y - 1; d = g - yd end
+			local mi = floor((100 * d + 52) / 3060)
+			y = (floor((mi + 2) / 12) + y)
+		end
+
+		local bool = dn >= yd - 3
+		local f = (bool and yd or CountDays(y - 1)) + 3 -- get the date for the 4-Jan of year `y`
+		local wday = (f + 1) % 7 -- get the ISO day number, 1 == Monday, 7 == Sunday
+		local w1 = f + (1 - (wday == 0 and 7 or wday))
+
+		if dn < w1 then
+			local f = CountDays(y - (bool and 1 or 2)) + 3 -- get the date for the 4-Jan of year `y`
+			local wday = (f + 1) % 7 -- get the ISO day number, 1 == Monday, 7 == Sunday
+			w1 = f + (1 - (wday == 0 and 7 or wday))
+		end
+
+		return floor((dn - w1) / 7 + 1)
 	end;
 
 	W = function(TimeData) -- Week of year as decimal number, with Monday as first day of week [0, 53]
-		return ("%02d"):format(Tags["#W"](TimeData))
+		return ("%02d"):format(TimeData["#W"])
 	end;
 
 	["#W"] = function(TimeData) -- Week of year as decimal number, with Monday as first day of week [0, 53]
@@ -253,7 +281,7 @@ Tags = setmetatable({
 	end;
 
 	Z = function()
-		error("Impossible to get timezone without location")
+		Debug.Error("Impossible to get timezone without location")
 	end;
 
 	z = function() -- Time zone offset from UTC in the form [+-]%02Hours%02Minutes, e.g. +0500
@@ -265,7 +293,7 @@ Tags = setmetatable({
 	end;
 }, {
 	__index = function(_, i) -- Error on invalid tag
-		error("bad argument to 'Time.Date' (invalid tag '%" .. i .. "')")
+		Debug.Error("invalid tag: %%" .. i)
 	end;
 })
 
@@ -275,34 +303,22 @@ Tags["#k"] = Tags["#H"]
 Tags["#l"] = Tags["#I"]
 
 function Tags:__index(i)
-	return Tags[i](self)
+	local Pattern = Patterns[i]
+	return Pattern and Pattern:gsub("%%(#?.)", self) or Tags[i](self)
 end
 
 local function Date(StringToFormat, Unix)
 	local TimeData
 
-	if StringToFormat then
-		if StringToFormat:byte() == CHAR_EXCLAMATION then
-			TimeData = os_date("!*t", Unix)
-			StringToFormat = StringToFormat:sub(2)
-		else
-			TimeData = os_date("*t", Unix)
-		end
+	if StringToFormat and StringToFormat:byte() == CHAR_EXCLAMATION then
+		TimeData = os_date("!*t", Unix)
+		StringToFormat = StringToFormat:sub(2)
 	else
 		TimeData = os_date("*t", Unix)
-		StringToFormat = "%c"
 	end
 
-	if StringToFormat == "*t" then
-		return TimeData
-	else
-		TimeData.seed = Unix
-		return (
-			StringToFormat
-				:gsub("%%(#?%a)", Patterns)
-				:gsub("%%(#?.)", setmetatable(TimeData, Tags))
-		)
-	end
+	return StringToFormat == "*t" and TimeData or
+		(StringToFormat or "%c"):gsub("%%(#?.)", setmetatable(TimeData, Tags))
 end
 
 return Date
