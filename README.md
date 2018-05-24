@@ -20,7 +20,7 @@ print(Date("%T")) -- 08:37:43
 print(Date("%D")) -- 01/12/20
 ```
 
-Functions just like the vanilla Lua `os.date` function, but padding can be toggled by inserting a '#' like so:
+`Date` functions just like the vanilla Lua `os.date` function, except padding can be toggled by inserting a '#' like so:
 
 ```lua
 print(Date("%#x", os.time()))
