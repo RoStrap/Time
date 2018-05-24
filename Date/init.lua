@@ -293,13 +293,16 @@ local function Date(StringToFormat, Unix)
 		StringToFormat = "%c"
 	end
 
-	TimeData.seed = Unix
-
-	return (
-		StringToFormat
-			:gsub("%%(#?%a)", Patterns)
-			:gsub("%%(#?.)", setmetatable(TimeData, Tags))
-	)
+	if StringToFormat == "*t" then
+		return TimeData
+	else
+		TimeData.seed = Unix
+		return (
+			StringToFormat
+				:gsub("%%(#?%a)", Patterns)
+				:gsub("%%(#?.)", setmetatable(TimeData, Tags))
+		)
+	end
 end
 
 return Date
