@@ -12,6 +12,12 @@ Demo:
 print(Date("%FT%T"))              -- 2020-01-01T01:03:05
 print(Date("%Y-%m-%dT%H:%M:%S"))  -- 2020-01-01T01:03:05
 print(Date("%FT%T%#z"))           -- 2020-01-01T01:03:05-05:00
+
+-- Time:
+print(Date("%T")) -- 08:37:43
+
+-- Date:
+print(Date("%D")) -- 01/12/20
 ```
 
 Functions just like the vanilla Lua `os.date` function, but padding can be toggled by inserting a '#' like so:
