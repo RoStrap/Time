@@ -2,7 +2,7 @@
 -- @readme https://github.com/RoStrap/Time/blob/master/README.md
 -- @author Validark
 
-local V_Helper = require(script:FindFirstChild("%V Helper"))
+local V_Helper = require(script:FindFirstChild("V_Helper"))
 
 local Suffixes = {"st", "nd", "rd"}
 local DayNames = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"}
