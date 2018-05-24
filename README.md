@@ -9,8 +9,9 @@ Demo:
 
 ```lua
 -- ISO 8601:
-print(Date("%FT%T"))    -- 2018-05-24T00:57:02
-print(Date("%FT%T%#z")) -- 2018-05-24T01:05:34-05:00
+print(Date("%FT%T"))              -- 2020-01-01T01:03:05
+print(Date("%Y-%m-%dT%H:%M:%S"))  -- 2020-01-01T01:03:05
+print(Date("%FT%T%#z"))           -- 2020-01-01T01:03:05-05:00
 ```
 
 Functions just like the vanilla Lua `os.date` function, but padding can be toggled by inserting a '#' like so:
