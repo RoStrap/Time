@@ -37,7 +37,7 @@ end
 local os_date = os.date
 
 local TimeZoneOffset, TimeZoneOffset2 do
-	local TimeData = os_date("*t")
+	local TimeData = os_date("!*t")
 	local Data = os_date("*t", os.time(TimeData))
 	local Deviation = (60 * Data.hour + Data.min) - (60 * TimeData.hour + TimeData.min)
 	local AbsoluteDeviation = math.abs(Deviation)
