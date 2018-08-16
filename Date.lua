@@ -46,7 +46,7 @@ local TimeZoneOffset, TimeZoneOffset2 do
 	local TimeData = os_date("!*t")
 	local Data = os_date("*t", os.time(TimeData))
 	local Deviation = (60 * Data.hour + Data.min) - (60 * TimeData.hour + TimeData.min)
-	local AbsoluteDeviation = math.abs(Deviation)
+	local AbsoluteDeviation = Deviation >= 0 and Deviation or -Deviation
 
 	TimeZoneOffset2 = ("%s%02d:%02d"):format(Deviation < 0 and "-" or "+", AbsoluteDeviation / 60, AbsoluteDeviation % 60)
 	TimeZoneOffset = TimeZoneOffset2:gsub(":", "", 1)
