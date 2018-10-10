@@ -14,19 +14,31 @@ local HourDifference do
 end
 
 local SyncedPoller = {}
+SyncedPoller.__index = {}
 
 function SyncedPoller.new(Interval, Func)
 	-- Calls Func every Interval seconds
 	-- @param number Interval How often in seconds Func() should be called
 	--	Obviously this uses `wait`, so 0 is a valid interval but it will in reality be about (1 / 30)
 	-- @param function Func the function to call
+	
+	local self = setmetatable({
+		Running = true
+	}, SyncedPoller)
 
 	spawn(function()
-		while true do
+		while self.Running do
 			local t = tick() + HourDifference
 			Func(t + wait(Interval - t % Interval))
 		end
 	end)
+	
+	return self
+end
+
+--- Cancels the previously instantiated poller.
+function SyncedPoller.__index:Cancel()
+	self.Running = false
 end
 
 return Table.Lock(SyncedPoller)
