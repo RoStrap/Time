@@ -1,5 +1,6 @@
 --[[
 	A class that continually calls a callback as long as a condition is true.
+	Calling :Poll() while already polling is ignored.
 ]]
 
 local ConditionalPoller = {}
@@ -22,12 +23,15 @@ function ConditionalPoller:Poll()
 
 	self.Polling = true
 
-	while self.ConditionCallback(self) and self.Polling do
-		self.PollCallback(self)
-		wait(self.Interval)
-	end
+	spawn(function()
+		while self.ConditionCallback(self) and self.Polling do
+			self.PollCallback(self)
+			wait(self.Interval)
+		end
 
-	self.Polling = false
+		self.Polling = false
+	end)
+
 end
 
 function ConditionalPoller:Cancel()
