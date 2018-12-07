@@ -241,9 +241,9 @@ local Tags = setmetatable({
 		local w1 = f + (1 - (wday == 0 and 7 or wday))
 
 		if dn < w1 then
-			local f = CountDays(y - (bool and 1 or 2)) + 3 -- get the date for the 4-Jan of year `y`
-			local wday = (f + 1) % 7 -- get the ISO day number, 1 == Monday, 7 == Sunday
-			w1 = f + (1 - (wday == 0 and 7 or wday))
+			local f2 = CountDays(y - (bool and 1 or 2)) + 3 -- get the date for the 4-Jan of year `y`
+			local wday2 = (f2 + 1) % 7 -- get the ISO day number, 1 == Monday, 7 == Sunday
+			w1 = f2 + (1 - (wday2 == 0 and 7 or wday2))
 		end
 
 		return floor((dn - w1) / 7 + 1)
@@ -302,9 +302,20 @@ Tags["#e"] = Tags["#d"]
 Tags["#k"] = Tags["#H"]
 Tags["#l"] = Tags["#I"]
 
+for Tag, Replacement in next, Patterns do
+	repeat
+		local Previous = Replacement
+		Replacement = Replacement:gsub("%%(#?.)", Patterns)
+	until Previous == Replacement -- Pre-optimize by evaluating recursive tags
+	-- e.g. "%#c" => "%#x, %#X" => "%A, %B %#d, %#Y, %#T" => "%A, %B %#d, %#Y, %#H:%M:%S"
+
+	Tags[Tag] = function(self)
+		return Replacement:gsub("%%(#?.)", self)
+	end
+end
+
 function Tags:__index(i)
-	local Pattern = Patterns[i]
-	return Pattern and Pattern:gsub("%%(#?.)", self) or Tags[i](self)
+	return Tags[i](self) -- We use this trick to make gsub automatically call from Tags
 end
 
 local function Date(StringToFormat, Unix)
