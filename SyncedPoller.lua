@@ -27,9 +27,15 @@ function SyncedPoller.new(Interval, Func)
 	}, SyncedPoller)
 
 	spawn(function()
-		while self.Running do
+		while true do
 			local t = tick() + HourDifference
-			Func(t + wait(Interval - t % Interval))
+			local TimeElapsed = t + wait(Interval - t % Interval)
+
+			if self.Running then
+					Func(TimeElapsed)
+			else
+					break
+			end
 		end
 	end)
 	
