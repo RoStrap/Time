@@ -1,7 +1,6 @@
---[[
-	A class that continually calls a callback as long as a condition is true.
-	Calling :Poll() while already polling is ignored.
-]]
+-- A class that continually calls a callback as long as a condition is true
+-- @author Evaera
+-- Calling :Poll() while already polling is ignored
 
 local ConditionalPoller = {}
 ConditionalPoller.__index = ConditionalPoller
